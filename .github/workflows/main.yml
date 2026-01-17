@@ -1,0 +1,27 @@
+name: BugBounty_Auto_Hunter
+on:
+  schedule:
+    - cron: '0 */12 * * *' # هەموو ١٢ کاتژمێر جارێک ئۆتۆماتیک ئیش دەکات
+  workflow_dispatch:
+
+jobs:
+  hunt:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Install Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name: Install Nuclei
+        run: |
+          pip install requests
+          curl -s https://api.github.com/repos/projectdiscovery/nuclei/releases/latest | grep "browser_download_url.*linux_amd64.zip" | cut -d : -f 2,3 | tr -d \" | wget -qi -
+          unzip nuclei*_linux_amd64.zip
+          sudo mv nuclei /usr/local/bin/
+
+      - name: Run Hunter
+        run: python main.py
